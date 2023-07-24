@@ -1,19 +1,22 @@
 package com.app.service;
 
-import com.app.repository.DocumentRepository;
+import com.app.constant.EmailConstant;
 import com.app.modele.Document;
-import javax.mail.*;
-import javax.mail.search.FlagTerm;
-import javax.mail.util.ByteArrayDataSource;
+import com.app.repository.DocumentRepository;
+import com.app.service.*;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
+import javax.activation.DataSource;
+import javax.mail.*;
+import javax.mail.internet.*;
+import javax.mail.search.FlagTerm;
+import javax.mail.util.ByteArrayDataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -23,41 +26,45 @@ import java.util.Properties;
 public class MailService {
 
     private final JavaMailSender javaMailSender;
-    DepartementService departementService; CategorieService categorieService; UserService userService;
-private  final DocumentRepository documentRepository;
+    private final DepartementService departementService;
+    private final CategorieService categorieService;
+    private final UserService userService;
+    private final DocumentRepository documentRepository;
+
     @Autowired
-    public MailService(JavaMailSender javaMailSender,DepartementService departementService, CategorieService categorieService, UserService userService, DocumentRepository documentRepository) {
+    public MailService(JavaMailSender javaMailSender, DepartementService departementService,
+                       CategorieService categorieService, UserService userService, DocumentRepository documentRepository) {
         this.javaMailSender = javaMailSender;
-        this.categorieService=categorieService;
-        this.departementService=departementService;
-        this.userService=userService;
-        this.documentRepository=documentRepository;
+        this.categorieService = categorieService;
+        this.departementService = departementService;
+        this.userService = userService;
+        this.documentRepository = documentRepository;
     }
 
-    public void sendEmail(String recipient, String subject, String content) {
+    public void sendEmail(String recipient, String content,String subject) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(recipient);
+        message.setFrom(EmailConstant.FROM_EMAIL);
+        message.setCc(EmailConstant.CC_EMAIL);
         message.setSubject(subject);
         message.setText(content);
         javaMailSender.send(message);
     }
 
-
-    public void sendEmailWithAttachment(String recipient, String subject, String content, byte[] attachmentContent, String attachmentFileName) {
+    public void sendEmailWithAttachment(String recipient, String content, byte[] attachmentContent, String attachmentFileName) {
         javaMailSender.send(mimeMessage -> {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
             messageHelper.setTo(recipient);
-            messageHelper.setSubject(subject);
+            messageHelper.setFrom(EmailConstant.FROM_EMAIL);
+            messageHelper.setCc(EmailConstant.CC_EMAIL);
+            messageHelper.setSubject(EmailConstant.EMAIL_SUBJECT);
             messageHelper.setText(content);
 
             // Attachement du document
-            ByteArrayDataSource attachment = new ByteArrayDataSource(attachmentContent, "application/octet-stream");
+            DataSource attachment = new ByteArrayDataSource(attachmentContent, "application/octet-stream");
             messageHelper.addAttachment(attachmentFileName, attachment);
         });
     }
-
-
-
 
     public void fetchUnreadDocuments() {
         try {
@@ -65,8 +72,8 @@ private  final DocumentRepository documentRepository;
             Properties properties = mailSender.getJavaMailProperties();
 
             Session session = Session.getInstance(properties);
-            Store store = session.getStore("imaps");
-            store.connect("imap.gmail.com", "test.docma@gmail.com", "dgnrdgnmmjgbbrza");
+            Store store = session.getStore(EmailConstant.SIMPLE_MAIL_TRANSFER_PROTOCOL);
+            store.connect(EmailConstant.GMAIL_SMTP_SERVER, EmailConstant.USERNAME, EmailConstant.PASSWORD);
 
             Folder inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_WRITE);
@@ -97,9 +104,9 @@ private  final DocumentRepository documentRepository;
             try (InputStream inputStream = bodyPart.getInputStream()) {
                 byte[] content = IOUtils.toByteArray(inputStream);
                 Document document = new Document();
-                String name=fileName+ LocalDateTime.now();
+                String name = fileName + LocalDateTime.now();
                 document.setNom(name);
-                long id=2l;
+                long id = 2l;
                 document.setCreatedBy(userService.findByUserId(id));
                 document.setModifiedBy(userService.findByUserId(id));
                 document.setCategorie(categorieService.findById(1l));
@@ -113,13 +120,4 @@ private  final DocumentRepository documentRepository;
         }
         return null;
     }
-
-
-
-
-
-
-
-
-
 }

@@ -70,18 +70,15 @@ public class UserResource extends ExceptionHandling {
     @PostMapping("/add")
     public ResponseEntity<User> addNewUser(@RequestParam("prenom") String prenom,
                                            @RequestParam("nom") String nom,
-
+                                           @RequestParam("departemntID") Long departementId,
                                            @RequestParam("email") String email,
                                            @RequestParam("role") String role,
                                            @RequestParam("isActive") String isActive,
                                            @RequestParam("isNonLocked") String isNonLocked,
                                            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException, URISyntaxException {
-        User newUser = userService.addNewUser(prenom, nom,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
+        User newUser = userService.addNewUser(prenom, nom,departementId,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
         return new ResponseEntity<>(newUser, OK);
     }
-
-
-
 
 
 

@@ -1,5 +1,6 @@
 package com.app.controller;
 
+import com.app.exception.ExceptionHandling;
 import com.app.modele.Document;
 import com.app.modele.User;
 import com.app.service.*;
@@ -16,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/documents")
 
-public class DocumentController {
+public class DocumentController  extends ExceptionHandling {
 
     private final DocumentService documentService;
     private final CategorieService categorieService;

@@ -1,49 +1,44 @@
 package com.app.service;
 
 import com.app.enumeration.Role;
-import com.app.exception.UserNotFoundException;
+import com.app.exception.*;
 import com.app.modele.Departement;
 import com.app.modele.User;
+import com.app.modele.UserPrincipal;
 import com.app.repository.DepartementRepository;
 import com.app.repository.UserRepository;
-import com.app.modele.*;
-import     com.app.exception.*;
-import org.apache.commons.lang3.RandomStringUtils;
-
-import com.app.enumeration.Role;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.mail.MessagingException;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
-import static com.app.constant.UserImplConstant.*;
 import static com.app.constant.FileConstant.*;
-
-import static com.app.enumeration.Role.ROLE_USER;
+import static com.app.constant.UserImplConstant.*;
+import static com.app.enumeration.Role.ROLE_SUPER_ADMIN;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.springframework.http.MediaType.*;
@@ -86,14 +81,26 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public User addNewUser(String prenom, String nom,  String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException, URISyntaxException {
+
+
+
+
+
+
+    public User addNewUser(String prenom, String nom,Long departementID,  String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException, URISyntaxException {
         String username=nom.toLowerCase()+prenom.toLowerCase();
         validateNewUsernameAndEmail(EMPTY, username, email);
         User user = new User();
         String password = generatePassword();
        // user.setUserId(generateUserId());
+        Optional<Departement> optionalDepartement = departementRepository.findById(departementID);
+        Departement departement=new Departement();
+        if (optionalDepartement.isPresent()){
+      departement = optionalDepartement.get();}
+
         user.setPrenom(prenom);
         user.setNom(nom);
+        user.setdepartement(departement);
         user.setDatecreation(new Date());
         user.setUsername(username);
         user.setEmail(email);
@@ -296,8 +303,8 @@ public void deleteUserId(Long id) {
         user.setPassword(encodePassword(password));
         user.setActive(true);
         user.setNotLocked(true);
-        user.setRole(ROLE_USER.name());
-        user.setAuthorities(ROLE_USER.getAuthorities());
+        user.setRole(ROLE_SUPER_ADMIN.name());
+        user.setAuthorities(ROLE_SUPER_ADMIN.getAuthorities());
         user.setImageUrl(getTemporaryProfileImageUrl());
         userRepository.save(user);
         LOGGER.info("New user password: " + password);

@@ -1,14 +1,11 @@
 package com.app.service;
 
+import com.app.exception.ContratNotFoundException;
+import com.app.modele.Categorie;
 import com.app.modele.Contrat;
 import com.app.modele.Departement;
 import com.app.modele.User;
 import com.app.repository.ContratRepository;
-
-import com.app.exception.ContratNotFoundException;
-
-
-import com.app.modele.Categorie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,14 +24,14 @@ import java.util.Optional;
 public class ContratService {
 
 
-    private DepartementService departementService;
+    private final DepartementService departementService;
     ////////////////////////////////////////////////////////
-    private com.app.repository.ContratRepository ContratRepository;
+    private final ContratRepository ContratRepository;
     ////////////////////////////////////////////////////
-    private CategorieService categorieService;
-    private UserService userService;
+    private final CategorieService categorieService;
+    private final UserService userService;
 
-
+    private final EmailService emailService;
 
 
 
@@ -43,16 +40,28 @@ public class ContratService {
     private MailService mailService;
 
     @Autowired
-    public ContratService(ContratRepository ContratRepository, DepartementService departementService, CategorieService categorieService, UserService userService) {
+    public ContratService(ContratRepository ContratRepository, DepartementService departementService, CategorieService categorieService, UserService userService, EmailService emailService) {
         this.ContratRepository = ContratRepository;
         this.departementService=departementService;
         this.categorieService=categorieService;
         this.userService=userService;
+        this.emailService = emailService;
+    }
+    public Contrat addContrat2(Contrat user,MultipartFile file) throws IOException {
+        Departement userDepartement = departementService.findById(2L) ;
+       user.setContent(file.getBytes());
+                user.setDepartement(userDepartement);
+
+
+
+        return ContratRepository.save(user);
     }
 
+    public Contrat addContrat(MultipartFile file,Long createdByUserId, Long categorieId, Long departementId, Date dateStart, Date dateEchance,
+                           String client, String fournisseur, String type
+                           ) {
 
-
-    public void addContrat(MultipartFile file,Long createdByUserId, Long categorieId, Long departementId) {
+        Contrat document = new Contrat();
         try {
             // Vérifier si l'utilisateur existe
             User createdBy = userService.findByUserId(createdByUserId);
@@ -72,33 +81,38 @@ public class ContratService {
                 throw new IllegalArgumentException("Département non trouvé");
             }
 
-            // Créer une instance de Contrat et définir les attributs
-            Contrat Contrat = new Contrat();
+            // Créer une instance de Document et définir les attributs
+
             String originalFileName = file.getOriginalFilename();
-            Contrat.setNom(originalFileName);
-            Contrat.setContent(file.getBytes());
-            Contrat.setCreatedBy(createdBy);
-            Contrat.setModifiedBy(createdBy);
-            Contrat.setCategorie(categorie);
-            Contrat.setDepartement(departement);
-            Contrat.setDateCreation(LocalDateTime.now());
-            Contrat.setDateModification(LocalDateTime.now());
+            document.setNom(type);
+            document.setContent(file.getBytes());
+            document.setCreatedBy(createdBy);
+            document.setCategorie(categorie);
+            document.setDepartement(departement);
+            document.setDateCreation(new Date());
+            document.setDateModification(new Date());
+            document.setPartieContractante(client);
+            document.setDateEchance(dateEchance);
+            document.setDateDebut(dateStart);
+            document.setFournisseur(fournisseur);
 
             // Vérifier si un fichier a été fourni
             if (!file.isEmpty()) {
                 // Récupérer le contenu du fichier sous forme de tableau d'octets
                 byte[] fileContent = file.getBytes();
-                // Définir le contenu du Contrat avec le contenu du fichier
-                Contrat.setContent(fileContent);
+                // Définir le contenu du document avec le contenu du fichier
+                document.setContent(fileContent);
             }
 
-            // Enregistrer le Contrat dans la base de données
-            ContratRepository.save(Contrat);
-            sendEmailNotification(Contrat);
+            // Enregistrer le document dans la base de données
+            ContratRepository.save(document);
+            // sendEmailNotification(document);
         } catch (IOException e) {
             // Gérer l'exception en conséquence
             e.printStackTrace();
         }
+
+        return document;
     }
 
 
@@ -161,8 +175,8 @@ public class ContratService {
             Contrat Contrat = new Contrat();
             Contrat.setNom(file.getOriginalFilename());
             Contrat.setContent(file.getBytes());
-            Contrat.setDateCreation(LocalDateTime.now());
-            Contrat.setDateModification(LocalDateTime.now());
+
+            Contrat.setDateModification(new Date());
 
             ContratRepository.save(Contrat);
         } catch (IOException e) {

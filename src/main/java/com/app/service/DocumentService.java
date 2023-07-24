@@ -94,7 +94,7 @@ public class DocumentService {
 
             // Enregistrer le document dans la base de données
             documentRepository.save(document);
-            sendEmailNotification(document);
+           // sendEmailNotification(document);
         } catch (IOException e) {
             // Gérer l'exception en conséquence
             e.printStackTrace();

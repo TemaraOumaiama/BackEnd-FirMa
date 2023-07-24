@@ -1,9 +1,9 @@
 package com.app.modele;
 
 
-import javax.persistence.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity

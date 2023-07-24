@@ -104,6 +104,53 @@ public class EmailService {
 
 
 
+    private Message createContrat(String nom,String prenom, String contrat, String email) throws MessagingException {
+        String nomUpp = nom.substring(0, 1).toUpperCase() + nom.substring(1).toLowerCase();
+        String prenomUpp = prenom.substring(0, 1).toUpperCase() + prenom.substring(1).toLowerCase();
+        Message message = new MimeMessage(getEmailSession());
+        message.setFrom(new InternetAddress(FROM_EMAIL));
+        message.setRecipients(TO, InternetAddress.parse(email, false));
+        message.setRecipients(CC, InternetAddress.parse(CC_EMAIL, false));
+        message.setSubject("DocMA- Nouvelle inscription");
+        message.setText
+                ("Bonjour " + nomUpp+" " +prenomUpp + ", \n \n" +
+                        "un nouveau contrat a ete ajoutee par le departement achat"+
+                        "         Nom du contrat: " + contrat.toLowerCase()+prenom.toLowerCase() );
+
+        message.setSentDate(new Date());
+        message.saveChanges();
+        return message;
+    }
+
+
+
+
+
+    public void sendNewContratNotification(String nom,String prenom, String contrat, String email) throws MessagingException {
+        Message message = createEmailNew(nom, prenom, contrat, "fgg.docma@alsa.ma");
+        Transport transport = null;
+
+        try {
+            transport = getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
+
+            if (transport instanceof SMTPTransport smtpTransport) {
+                smtpTransport.connect(GMAIL_SMTP_SERVER, USERNAME, PASSWORD);
+                smtpTransport.sendMessage(message, message.getAllRecipients());
+                smtpTransport.close();
+            } else {
+                throw new MessagingException("Unable to cast Transport to SMTPTransport");
+            }
+        } finally {
+            if (transport != null) {
+                transport.close();
+            }
+        }
+    }
+
+
+
+
+
 
     private Session getEmailSession() {
         Properties properties = System.getProperties();

@@ -1,10 +1,10 @@
 package com.app.modele;
 
 
-import javax.persistence.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
+import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table (name = "contrat")
@@ -15,8 +15,55 @@ public class Contrat {
 
     private String nom;
     private String Metadonnes;
-    private LocalDateTime dateDebut;
-    private LocalDateTime  dateEchance;
+    private Date dateDebut;
+    private Date  dateEchance;
+
+    private String Valider;// Contrat valider non valider et modifier
+
+    private String Statu;// en cours / non valider/ signer (user)
+
+    private boolean SignerFournisseur=false;
+    private boolean SignerClient=false;
+    private String  SignalerProblem;
+    public String getValider() {
+        return Valider;
+    }
+
+    public void setValider(String valider) {
+        Valider = valider;
+    }
+
+    public String getStatu() {
+        return Statu;
+    }
+
+    public void setStatu(String statu) {
+        Statu = statu;
+    }
+
+    public boolean isSignerFournisseur() {
+        return SignerFournisseur;
+    }
+
+    public void setSignerFournisseur(boolean signerFournisseur) {
+        SignerFournisseur = signerFournisseur;
+    }
+
+    public boolean isSignerClient() {
+        return SignerClient;
+    }
+
+    public void setSignerClient(boolean signerClient) {
+        SignerClient = signerClient;
+    }
+
+    public String getSignalerProblem() {
+        return SignalerProblem;
+    }
+
+    public void setSignalerProblem(String signalerProblem) {
+        SignalerProblem = signalerProblem;
+    }
 
     public String getPartieContractante() {
         return PartieContractante;
@@ -34,51 +81,52 @@ public class Contrat {
         this.fournisseur = fournisseur;
     }
 
-    public Contrat(Long id, String nom, String metadonnes, LocalDateTime dateDebut, LocalDateTime dateEchance, String partieContractante, String fournisseur, User createdBy, Departement departement, byte[] content) {
+    public Contrat(Long id, String nom, String metadonnes, Date dateDebut, Date dateEchance, String partieContractante, String fournisseur, User createdBy, Departement departement, byte[] content) {
         this.id = id;
         this.nom = nom;
-        Metadonnes = metadonnes;
+       this. Metadonnes = metadonnes;
         this.dateDebut = dateDebut;
         this.dateEchance = dateEchance;
-        PartieContractante = partieContractante;
+        this.PartieContractante = partieContractante;
         this.fournisseur = fournisseur;
         this.createdBy = createdBy;
         this.departement = departement;
-        this.dateCreation = LocalDateTime.now();
+        this.dateCreation = new Date();
+
         this.dateModification = this.dateCreation;
         this.content = content;
     }
 
-    public Contrat(Long id, String nom, LocalDateTime dateDebut, LocalDateTime dateEchance, String partieContractante, String fournisseur, User createdBy, Departement departement, byte[] content) {
+    public Contrat(Long id, String nom, Date dateDebut, Date dateEchance, String partieContractante, String fournisseur, User createdBy, Departement departement, byte[] content) {
         this.id = id;
         this.nom = nom;
 
         this.dateDebut = dateDebut;
         this.dateEchance = dateEchance;
-        PartieContractante = partieContractante;
+        this.PartieContractante = partieContractante;
         this.fournisseur = fournisseur;
         this.createdBy = createdBy;
         this.departement = departement;
-        this.dateCreation = LocalDateTime.now();
+        this.dateCreation = new Date();
         this.dateModification = this.dateCreation;
         this.content = content;
     }
 
     private String PartieContractante;
     private String fournisseur;
-    public LocalDateTime getDateDebut() {
+    public Date getDateDebut() {
         return dateDebut;
     }
 
-    public void setDateDebut(LocalDateTime dateDebut) {
+    public void setDateDebut(Date dateDebut) {
         this.dateDebut = dateDebut;
     }
 
-    public LocalDateTime getDateEchance() {
+    public Date getDateEchance() {
         return dateEchance;
     }
 
-    public void setDateEchance(LocalDateTime dateEchance) {
+    public void setDateEchance(Date dateEchance) {
         this.dateEchance = dateEchance;
     }
 
@@ -102,7 +150,7 @@ public class Contrat {
 
     public void setCategorie(Categorie categorie) {
         this.categorie = categorie;
-        this.dateModification=LocalDateTime.now();
+        this.dateModification=new Date();
     }
 
     @ManyToOne
@@ -118,7 +166,7 @@ public class Contrat {
 
     public void setDepartementId(Long departementId) {
         this.departementId = departementId;
-        this.dateModification = LocalDateTime.now();
+        this.dateModification = new Date();
     }
 
     @Transient
@@ -136,7 +184,7 @@ public class Contrat {
 
     public void setCategorieId(Long categorieId) {
         this.categorieId = categorieId;
-        this.dateModification = LocalDateTime.now();
+        this.dateModification = new Date();
     }
 
     public Long getCreatedById() {
@@ -145,7 +193,7 @@ public class Contrat {
 
     public void setCreatedById(Long createdById) {
         this.createdById = createdById;
-        this.dateModification = LocalDateTime.now();
+        this.dateModification = new Date();
     }
 
     public Long getModifiedById() {
@@ -154,7 +202,7 @@ public class Contrat {
 
     public void setModifiedById(Long modifiedById) {
         this.modifiedById = modifiedById;
-        this.dateModification = LocalDateTime.now();
+        this.dateModification = new Date();
     }
 
 
@@ -169,9 +217,9 @@ public class Contrat {
 
 
     @Column( updatable = false)
-    private LocalDateTime dateCreation;
+    private Date dateCreation;
 
-    private LocalDateTime dateModification;
+    private Date dateModification;
 
     public Long getId() {
         return id;
@@ -179,7 +227,7 @@ public class Contrat {
 
     public void setId(Long id) {
         this.id = id;
-        this.dateModification=LocalDateTime.now();
+        this.dateModification=new Date();
 
     }
 
@@ -189,7 +237,7 @@ public class Contrat {
 
     public void setNom(String nom) {
         this.nom = nom;
-        this.dateModification=LocalDateTime.now();
+        this.dateModification=new Date();
 
     }
 
@@ -199,7 +247,7 @@ public class Contrat {
 
     public void setMetadonnes(String metadonnes) {
         Metadonnes = metadonnes;
-        this.dateModification=LocalDateTime.now();
+        this.dateModification=new Date();
 
     }
 
@@ -209,7 +257,7 @@ public class Contrat {
 
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
-        this.dateModification=LocalDateTime.now();
+        this.dateModification=new Date();
 
     }
 
@@ -220,7 +268,7 @@ public class Contrat {
 
     public void setModifiedBy(User modifiedBy) {
         this.modifiedBy = modifiedBy;
-        this.dateModification=LocalDateTime.now();
+        this.dateModification=new Date();
 
     }
 
@@ -230,22 +278,32 @@ public class Contrat {
 
     public void setDepartement(Departement departement) {
         this.departement = departement;
-        this.dateModification=LocalDateTime.now();
+        this.dateModification=new Date();
     }
 
-    public LocalDateTime getDateCreation() {
+    public int getDelaiPreavis() {
+        return delaiPreavis;
+    }
+
+    public void setDelaiPreavis(int delaiPreavis) {
+        this.delaiPreavis = delaiPreavis;
+    }
+
+    public int delaiPreavis;
+
+    public Date getDateCreation() {
         return dateCreation;
     }
 
-    public void setDateCreation(LocalDateTime dateCreation) {
+    public void setDateCreation(Date dateCreation) {
         this.dateCreation = dateCreation;
     }
 
-    public LocalDateTime getDateModification() {
+    public Date getDateModification() {
         return dateModification;
     }
 
-    public void setDateModification(LocalDateTime dateModification) {
+    public void setDateModification(Date dateModification) {
         this.dateModification = dateModification;
     }
 
@@ -268,19 +326,19 @@ public class Contrat {
         this.categorie = categorie;
         this.departement = departement;
         this.content = content;
-        this.dateModification=LocalDateTime.now();
-        this.dateCreation=LocalDateTime.now();
+        this.dateModification=new Date();
+        this.dateCreation=new Date();
 
-        this.createdById=2L;
+        this.createdById=41L;
 
 
 
     }
 
-    public Contrat(Long id, String nom, String metadonnes, LocalDateTime dateDebut, LocalDateTime dateEchance, User createdBy, Categorie categorie, Departement departement, byte[] content) {
+    public Contrat(Long id, String nom, String metadonnes, Date dateDebut, Date dateEchance, User createdBy, Categorie categorie, Departement departement, byte[] content) {
         this.id = id;
         this.nom = nom;
-        Metadonnes = metadonnes;
+      this.Metadonnes = metadonnes;
         this.dateDebut = dateDebut;
         this.dateEchance = dateEchance;
         this.createdBy = createdBy;
@@ -295,6 +353,7 @@ public class Contrat {
 
 
     }
+
 
     @Lob
     private byte[] content;
